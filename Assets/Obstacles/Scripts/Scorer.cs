@@ -8,9 +8,10 @@ namespace Obstacles.Scripts
         
         private void OnCollisionEnter(Collision collision)
         {
-            _hits++;
-
-            Debug.Log(_hits);
+            if (collision.gameObject.CompareTag("Untagged"))
+            {
+                _hits++;
+            }
         }
     }
 }
