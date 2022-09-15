@@ -6,23 +6,17 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float _moveUpPower;
     [SerializeField] private float _rotationPower;
     [SerializeField] private AudioSource _audio;
+    [SerializeField] private AudioClip _moveClip;
+    [SerializeField] private ParticleSystem _moveUpParticles;
+    [SerializeField] private ParticleSystem _leftParticles;
+    [SerializeField] private ParticleSystem _rightParticles;
 
     private Vector2 _direction;
-    private bool _isAlive;
-
-    private void Awake()
-    {
-        _isAlive = true;
-    }
-
+   
     private void FixedUpdate()
     {
         Rotate();
-        
-        if (_rigidbody.velocity.y < -4.2f)
-        {
-            _audio.Stop();
-        }
+        StopSources();
     }
 
     public void SetValue(Vector2 direction)
@@ -32,16 +26,17 @@ public class PlayerMovement : MonoBehaviour
 
     public void MoveUp()
     {
-        if (!_isAlive)
+       _rigidbody.AddRelativeForce(Vector3.up * _moveUpPower * Time.deltaTime);
+       PlayMoveClip();
+       TurnOnParticles(_moveUpParticles);
+    }
+
+    private void StopSources()
+    {
+        if (_rigidbody.velocity.y < -4.2f)
         {
-            return;
-        }
-        
-        _rigidbody.AddRelativeForce(Vector3.up * _moveUpPower * Time.deltaTime);
-        
-        if (!_audio.isPlaying)
-        {
-            _audio.Play();
+            _audio.Stop();
+            _moveUpParticles.Stop();
         }
     }
 
@@ -50,10 +45,33 @@ public class PlayerMovement : MonoBehaviour
         if (_direction.x < 0)
         {
             ApplyRotation(_rotationPower);
+            TurnOnParticles(_rightParticles);
         }
         else if (_direction.x > 0)
         {
             ApplyRotation(-_rotationPower);
+            TurnOnParticles(_leftParticles);
+        }
+        else
+        {
+            _rightParticles.Stop();
+            _leftParticles.Stop();
+        }
+    }
+
+    private void PlayMoveClip()
+    {
+        if (!_audio.isPlaying)
+        {
+            _audio.PlayOneShot(_moveClip);
+        }
+    }
+
+    private void TurnOnParticles(ParticleSystem particles)
+    {
+        if (!particles.isPlaying)
+        {
+            particles.Play();
         }
     }
 
